@@ -7,7 +7,7 @@ class ByteBankApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        body: FormularioTransferencia(),
+        body: ListaTransferencia(),
       ),
     );
   }
@@ -50,6 +50,7 @@ class FormularioTransferencia extends StatelessWidget {
     final double? valor = double.tryParse(_controladorCampoValor.text);
     if (numeroConta != null && valor != null) {
       final TransferenciaCriada = Transferencia(valor, numeroConta);
+      Navigator.pop(context, TransferenciaCriada);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('$TransferenciaCriada'),
@@ -88,21 +89,34 @@ class Editor extends StatelessWidget {
 }
 
 class ListaTransferencia extends StatelessWidget {
+  final List<Transferencia> _transferencias = [];
+
   @override
   Widget build(BuildContext context) {
+    _transferencias.add(Transferencia(123, 123));
     return Scaffold(
       appBar: AppBar(
         title: Text('Transferências'),
       ),
-      body: Column(
-        children: [
-          ItemTransferencia(Transferencia(100.0, 1000)),
-          ItemTransferencia(Transferencia(350.0, 0101)),
-          ItemTransferencia(Transferencia(290.0, 0001)),
-        ],
+      body: ListView.builder(
+        itemCount: _transferencias.length,
+        itemBuilder: (context, posicao) {
+          final transferencia = _transferencias[posicao];
+          return ItemTransferencia(transferencia);
+        },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          final Future<Transferencia?> future =
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return FormularioTransferencia();
+          }));
+          future.then((TransferenciaRecebida) {
+            if (TransferenciaRecebida != null) {
+              _transferencias.add(TransferenciaRecebida);
+            }
+          });
+        },
         child: Icon(Icons.add),
       ),
     );
